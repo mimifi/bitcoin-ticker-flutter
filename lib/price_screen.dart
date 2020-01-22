@@ -1,6 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'coin_data.dart';
+import 'dart:io' show Platform;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -8,7 +9,9 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  List<DropdownMenuItem> getDropdownMenuItems() {
+  String dropDownValue;
+
+  DropdownButton<String> getDropdownMenuItems() {
     List<DropdownMenuItem<String>> listOfItems = [];
     for (String currency in currenciesList) {
       DropdownMenuItem<String> newItem = DropdownMenuItem(
@@ -17,10 +20,33 @@ class _PriceScreenState extends State<PriceScreen> {
       );
       listOfItems.add(newItem);
     }
-    return listOfItems;
+
+    return DropdownButton<String>(
+      value: dropDownValue,
+      items: listOfItems,
+      onChanged: (String newValue) {
+        setState(() {
+          dropDownValue = newValue;
+        });
+      },
+    );
   }
 
-  String dropDownValue;
+  CupertinoPicker getPickerItems() {
+    List<Text> currencyWidgets = [];
+    for (String currency in currenciesList) {
+      currencyWidgets.add(Text(currency));
+    }
+
+    return CupertinoPicker(
+      itemExtent: 30.0,
+      children: currencyWidgets,
+      onSelectedItemChanged: (itemPickerIndex) {
+        dropDownValue = currenciesList[itemPickerIndex];
+        print(dropDownValue);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,20 +80,13 @@ class _PriceScreenState extends State<PriceScreen> {
             ),
           ),
           Container(
-            height: 150.0,
-            alignment: Alignment.center,
-            padding: EdgeInsets.only(bottom: 30.0),
-            color: Colors.lightBlue,
-            child: DropdownButton<String>(
-              value: dropDownValue,
-              items: getDropdownMenuItems(),
-              onChanged: (String newValue) {
-                setState(() {
-                  dropDownValue = newValue;
-                });
-              },
-            ),
-          ),
+              height: 150.0,
+              alignment: Alignment.center,
+              padding: EdgeInsets.only(bottom: 30.0),
+              color: Colors.lightBlue,
+              child: Platform.isAndroid
+                  ? getDropdownMenuItems()
+                  : getPickerItems()),
         ],
       ),
     );
