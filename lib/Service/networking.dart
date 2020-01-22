@@ -2,14 +2,15 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
 class NetworkHelper {
-  Future<dynamic> getResponse() async {
+  Future getResponse(currency) async {
     String url =
-        'https://apiv2.bitcoinaverage.com/indices/global/ticker/BTCUSD';
+        'https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC$currency';
 
-    var response = await http.get(url);
+    http.Response response = await http.get(url);
     if (response.statusCode == 200) {
-      var jsonResponse = convert.jsonDecode(response.body);
-      double lastPrice = jsonResponse['last'];
+      String data = response.body;
+      dynamic jsonData = convert.jsonDecode(data);
+      double lastPrice = jsonData['last'];
       return lastPrice;
     } else {
       print('Request failed with status ${response.statusCode}.');

@@ -1,8 +1,8 @@
+import 'dart:io' show Platform;
 import 'package:bitcoin_ticker/Service/networking.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
-import 'dart:io' show Platform;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -11,8 +11,14 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String dropDownValue;
-  dynamic lastPrice;
+  double lastPrice;
+
   NetworkHelper networkHelper = NetworkHelper();
+
+  Future<double> updatePrice(currency) async {
+    lastPrice = await networkHelper.getResponse(currency);
+    return lastPrice;
+  }
 
   DropdownButton<String> getDropdownMenuItems() {
     List<DropdownMenuItem<String>> listOfItems = [];
@@ -44,22 +50,16 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       itemExtent: 30.0,
       children: currencyWidgets,
-      onSelectedItemChanged: (itemPickerIndex) {
-        setState(() {
-          dropDownValue = currenciesList[itemPickerIndex];
-        });
+      onSelectedItemChanged: (itemPickerIndex) async {
+        dropDownValue = currenciesList[itemPickerIndex];
+        await updatePrice(dropDownValue);
+        setState(() {});
       },
     );
   }
 
-  void updatePrice() async {
-    lastPrice = await networkHelper.getResponse();
-  }
-
   @override
   Widget build(BuildContext context) {
-    updatePrice();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('🤑 Coin Ticker'),
@@ -94,9 +94,8 @@ class _PriceScreenState extends State<PriceScreen> {
               alignment: Alignment.center,
               padding: EdgeInsets.only(bottom: 30.0),
               color: Colors.lightBlue,
-              child: Platform.isAndroid
-                  ? getDropdownMenuItems()
-                  : getPickerItems()),
+              child:
+                  Platform.isIOS ? getPickerItems() : getDropdownMenuItems()),
         ],
       ),
     );
