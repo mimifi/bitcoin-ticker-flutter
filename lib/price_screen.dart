@@ -1,3 +1,4 @@
+import 'package:bitcoin_ticker/Service/networking.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
@@ -10,6 +11,8 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String dropDownValue;
+  dynamic lastPrice;
+  NetworkHelper networkHelper = NetworkHelper();
 
   DropdownButton<String> getDropdownMenuItems() {
     List<DropdownMenuItem<String>> listOfItems = [];
@@ -42,14 +45,21 @@ class _PriceScreenState extends State<PriceScreen> {
       itemExtent: 30.0,
       children: currencyWidgets,
       onSelectedItemChanged: (itemPickerIndex) {
-        dropDownValue = currenciesList[itemPickerIndex];
-        print(dropDownValue);
+        setState(() {
+          dropDownValue = currenciesList[itemPickerIndex];
+        });
       },
     );
   }
 
+  void updatePrice() async {
+    lastPrice = await networkHelper.getResponse();
+  }
+
   @override
   Widget build(BuildContext context) {
+    updatePrice();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('🤑 Coin Ticker'),
@@ -69,7 +79,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $lastPrice $dropDownValue',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
