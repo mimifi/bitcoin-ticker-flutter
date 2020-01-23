@@ -1,5 +1,5 @@
 import 'dart:io' show Platform;
-import 'package:bitcoin_ticker/Service/networking.dart';
+import 'package:bitcoin_ticker/widgets/reusable_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
@@ -11,13 +11,28 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String dropDownValue;
-  double lastPrice;
+  double lastBtcPrice;
+  double lastEthPrice;
+  double lastLtcPrice;
 
-  NetworkHelper networkHelper = NetworkHelper();
+  CoinData coinData = CoinData();
 
-  Future<double> updatePrice(currency) async {
-    lastPrice = await networkHelper.getResponse(currency);
-    return lastPrice;
+  Future<double> updateBtcPrice(currency) async {
+    lastBtcPrice = await coinData.getResponse(
+        sourceCurrency: cryptoList[0], targetCurrency: currency);
+    return lastBtcPrice;
+  }
+
+  Future<double> updateEthPrice(currency) async {
+    lastEthPrice = await coinData.getResponse(
+        sourceCurrency: cryptoList[1], targetCurrency: currency);
+    return lastBtcPrice;
+  }
+
+  Future<double> updateLtcPrice(currency) async {
+    lastLtcPrice = await coinData.getResponse(
+        sourceCurrency: cryptoList[2], targetCurrency: currency);
+    return lastBtcPrice;
   }
 
   DropdownButton<String> getDropdownMenuItems() {
@@ -34,7 +49,9 @@ class _PriceScreenState extends State<PriceScreen> {
       value: dropDownValue,
       items: listOfItems,
       onChanged: (String newValue) async {
-        await updatePrice(newValue);
+        await updateBtcPrice(newValue);
+        await updateEthPrice(dropDownValue);
+        await updateLtcPrice(dropDownValue);
         setState(() {
           dropDownValue = newValue;
         });
@@ -53,7 +70,9 @@ class _PriceScreenState extends State<PriceScreen> {
       children: currencyWidgets,
       onSelectedItemChanged: (itemPickerIndex) async {
         dropDownValue = currenciesList[itemPickerIndex];
-        await updatePrice(dropDownValue);
+        await updateBtcPrice(dropDownValue);
+        await updateEthPrice(dropDownValue);
+        await updateLtcPrice(dropDownValue);
         setState(() {});
       },
     );
@@ -63,7 +82,13 @@ class _PriceScreenState extends State<PriceScreen> {
   void initState() {
     super.initState();
     dropDownValue = currenciesList.first;
-    updatePrice(dropDownValue).then((result) {
+    updateBtcPrice(dropDownValue).then((result) {
+      setState(() {});
+    });
+    updateEthPrice(dropDownValue).then((result) {
+      setState(() {});
+    });
+    updateLtcPrice(dropDownValue).then((result) {
       setState(() {});
     });
   }
@@ -76,28 +101,27 @@ class _PriceScreenState extends State<PriceScreen> {
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              ReusableCard(
+                cryptoCurrency: cryptoList[0],
+                price: lastBtcPrice,
+                currencyValue: dropDownValue,
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = $lastPrice $dropDownValue',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
+              ReusableCard(
+                cryptoCurrency: cryptoList[1],
+                price: lastEthPrice,
+                currencyValue: dropDownValue,
               ),
-            ),
+              ReusableCard(
+                cryptoCurrency: cryptoList[2],
+                price: lastLtcPrice,
+                currencyValue: dropDownValue,
+              ),
+            ],
           ),
           Container(
               height: 150.0,
