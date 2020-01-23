@@ -33,7 +33,8 @@ class _PriceScreenState extends State<PriceScreen> {
     return DropdownButton<String>(
       value: dropDownValue,
       items: listOfItems,
-      onChanged: (String newValue) {
+      onChanged: (String newValue) async {
+        await updatePrice(newValue);
         setState(() {
           dropDownValue = newValue;
         });
