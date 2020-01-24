@@ -11,28 +11,21 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String dropDownValue;
-  double lastBtcPrice;
-  double lastEthPrice;
-  double lastLtcPrice;
 
   CoinData coinData = CoinData();
+  List<ReusableCard> reusableCards = [];
 
-  Future<double> updateBtcPrice(currency) async {
-    lastBtcPrice = await coinData.getResponse(
-        sourceCurrency: cryptoList[0], targetCurrency: currency);
-    return lastBtcPrice;
-  }
-
-  Future<double> updateEthPrice(currency) async {
-    lastEthPrice = await coinData.getResponse(
-        sourceCurrency: cryptoList[1], targetCurrency: currency);
-    return lastBtcPrice;
-  }
-
-  Future<double> updateLtcPrice(currency) async {
-    lastLtcPrice = await coinData.getResponse(
-        sourceCurrency: cryptoList[2], targetCurrency: currency);
-    return lastBtcPrice;
+  List<ReusableCard> createReusableCards() {
+    reusableCards = [];
+    for (String crypto in cryptoList) {
+      ReusableCard card = ReusableCard(
+        cryptoCurrency: crypto,
+        price: lastBtcPrice,
+        currencyValue: dropDownValue,
+      );
+      reusableCards.add(card);
+    }
+    return reusableCards;
   }
 
   DropdownButton<String> getDropdownMenuItems() {
@@ -49,9 +42,9 @@ class _PriceScreenState extends State<PriceScreen> {
       value: dropDownValue,
       items: listOfItems,
       onChanged: (String newValue) async {
-        await updateBtcPrice(newValue);
-        await updateEthPrice(dropDownValue);
-        await updateLtcPrice(dropDownValue);
+        await coinData.updateBtcPrice(newValue);
+        await coinData.updateEthPrice(dropDownValue);
+        await coinData.updateLtcPrice(dropDownValue);
         setState(() {
           dropDownValue = newValue;
         });
@@ -70,9 +63,9 @@ class _PriceScreenState extends State<PriceScreen> {
       children: currencyWidgets,
       onSelectedItemChanged: (itemPickerIndex) async {
         dropDownValue = currenciesList[itemPickerIndex];
-        await updateBtcPrice(dropDownValue);
-        await updateEthPrice(dropDownValue);
-        await updateLtcPrice(dropDownValue);
+        await coinData.updateBtcPrice(dropDownValue);
+        await coinData.updateEthPrice(dropDownValue);
+        await coinData.updateLtcPrice(dropDownValue);
         setState(() {});
       },
     );
@@ -82,13 +75,13 @@ class _PriceScreenState extends State<PriceScreen> {
   void initState() {
     super.initState();
     dropDownValue = currenciesList.first;
-    updateBtcPrice(dropDownValue).then((result) {
+    coinData.updateBtcPrice(dropDownValue).then((result) {
       setState(() {});
     });
-    updateEthPrice(dropDownValue).then((result) {
+    coinData.updateEthPrice(dropDownValue).then((result) {
       setState(() {});
     });
-    updateLtcPrice(dropDownValue).then((result) {
+    coinData.updateLtcPrice(dropDownValue).then((result) {
       setState(() {});
     });
   }
@@ -105,23 +98,7 @@ class _PriceScreenState extends State<PriceScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              ReusableCard(
-                cryptoCurrency: cryptoList[0],
-                price: lastBtcPrice,
-                currencyValue: dropDownValue,
-              ),
-              ReusableCard(
-                cryptoCurrency: cryptoList[1],
-                price: lastEthPrice,
-                currencyValue: dropDownValue,
-              ),
-              ReusableCard(
-                cryptoCurrency: cryptoList[2],
-                price: lastLtcPrice,
-                currencyValue: dropDownValue,
-              ),
-            ],
+            children: createReusableCards(),
           ),
           Container(
               height: 150.0,

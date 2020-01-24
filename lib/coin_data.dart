@@ -1,6 +1,10 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
+double lastBtcPrice;
+double lastEthPrice;
+double lastLtcPrice;
+
 const List<String> currenciesList = [
   'AUD',
   'BRL',
@@ -45,5 +49,23 @@ class CoinData {
     } else {
       print('Request failed with status ${response.statusCode}.');
     }
+  }
+
+  Future<double> updateBtcPrice(targetCurrency) async {
+    lastBtcPrice = await getResponse(
+        sourceCurrency: cryptoList[0], targetCurrency: targetCurrency);
+    return lastBtcPrice;
+  }
+
+  Future<double> updateEthPrice(targetCurrency) async {
+    lastEthPrice = await getResponse(
+        sourceCurrency: cryptoList[1], targetCurrency: targetCurrency);
+    return lastEthPrice;
+  }
+
+  Future<double> updateLtcPrice(targetCurrency) async {
+    lastLtcPrice = await getResponse(
+        sourceCurrency: cryptoList[2], targetCurrency: targetCurrency);
+    return lastLtcPrice;
   }
 }
