@@ -1,9 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
-double lastBtcPrice;
-double lastEthPrice;
-double lastLtcPrice;
+String defaultUrl = 'https://apiv2.bitcoinaverage.com/indices/global/ticker';
+List<double> targetPrice = [];
 
 const List<String> currenciesList = [
   'AUD',
@@ -36,9 +35,8 @@ const List<String> cryptoList = [
 ];
 
 class CoinData {
-  Future getResponse({sourceCurrency, targetCurrency}) async {
-    String url =
-        'https://apiv2.bitcoinaverage.com/indices/global/ticker/$sourceCurrency$targetCurrency';
+  Future<double> getResponse({sourceCurrency, targetCurrency}) async {
+    String url = '$defaultUrl/$sourceCurrency$targetCurrency';
 
     http.Response response = await http.get(url);
     if (response.statusCode == 200) {
@@ -48,24 +46,20 @@ class CoinData {
       return lastPrice;
     } else {
       print('Request failed with status ${response.statusCode}.');
+      return 0;
     }
   }
 
-  Future<double> updateBtcPrice(targetCurrency) async {
-    lastBtcPrice = await getResponse(
-        sourceCurrency: cryptoList[0], targetCurrency: targetCurrency);
-    return lastBtcPrice;
-  }
-
-  Future<double> updateEthPrice(targetCurrency) async {
-    lastEthPrice = await getResponse(
-        sourceCurrency: cryptoList[1], targetCurrency: targetCurrency);
-    return lastEthPrice;
-  }
-
-  Future<double> updateLtcPrice(targetCurrency) async {
-    lastLtcPrice = await getResponse(
-        sourceCurrency: cryptoList[2], targetCurrency: targetCurrency);
-    return lastLtcPrice;
+  Future<List<double>> updateTargetPrice(targetCurrency) async {
+    List<double> targetPrices = [];
+    for (var i = 0; i < cryptoList.length; i++) {
+      targetPrices.add(
+        await getResponse(
+          sourceCurrency: cryptoList[i],
+          targetCurrency: targetCurrency,
+        ),
+      );
+    }
+    return targetPrices;
   }
 }

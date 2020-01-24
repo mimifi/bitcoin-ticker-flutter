@@ -11,16 +11,26 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String dropDownValue;
+  String crypto;
+  List<double> targetPrices = [];
 
   CoinData coinData = CoinData();
   List<ReusableCard> reusableCards = [];
 
+  Future<void> updatePrice() async {
+    List<double> listOfTargetPrice =
+        await coinData.updateTargetPrice(dropDownValue);
+    setState(() {
+      targetPrices = listOfTargetPrice;
+    });
+  }
+
   List<ReusableCard> createReusableCards() {
     reusableCards = [];
-    for (String crypto in cryptoList) {
+    for (var i = 0; i < cryptoList.length; i++) {
       ReusableCard card = ReusableCard(
-        cryptoCurrency: crypto,
-        price: lastBtcPrice,
+        cryptoCurrency: cryptoList[i],
+        price: targetPrices[i],
         currencyValue: dropDownValue,
       );
       reusableCards.add(card);
@@ -42,9 +52,7 @@ class _PriceScreenState extends State<PriceScreen> {
       value: dropDownValue,
       items: listOfItems,
       onChanged: (String newValue) async {
-        await coinData.updateBtcPrice(newValue);
-        await coinData.updateEthPrice(dropDownValue);
-        await coinData.updateLtcPrice(dropDownValue);
+        await updatePrice();
         setState(() {
           dropDownValue = newValue;
         });
@@ -63,10 +71,7 @@ class _PriceScreenState extends State<PriceScreen> {
       children: currencyWidgets,
       onSelectedItemChanged: (itemPickerIndex) async {
         dropDownValue = currenciesList[itemPickerIndex];
-        await coinData.updateBtcPrice(dropDownValue);
-        await coinData.updateEthPrice(dropDownValue);
-        await coinData.updateLtcPrice(dropDownValue);
-        setState(() {});
+        await updatePrice();
       },
     );
   }
@@ -75,15 +80,10 @@ class _PriceScreenState extends State<PriceScreen> {
   void initState() {
     super.initState();
     dropDownValue = currenciesList.first;
-    coinData.updateBtcPrice(dropDownValue).then((result) {
-      setState(() {});
-    });
-    coinData.updateEthPrice(dropDownValue).then((result) {
-      setState(() {});
-    });
-    coinData.updateLtcPrice(dropDownValue).then((result) {
-      setState(() {});
-    });
+    updatePrice();
+    for (int index = 0; index < cryptoList.length; index++) {
+      targetPrices.add(0);
+    }
   }
 
   @override
